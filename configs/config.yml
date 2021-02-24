@@ -1,0 +1,19 @@
+data:
+  path_to_corpus: data/corpus
+  path_to_preproc_data: data/preproc-data
+  path_to_output: data/path_to_output
+
+model:
+  model_name: bert-base-cased
+  max_seq_length: 256
+
+training:
+  learning_rate: 3e-5
+  num_epochs: 10
+  accum_steps: 4
+  batch_size: 15
+  log_dir: logdir
+  fp16_params: None
+
+general:
+  seed: 43
