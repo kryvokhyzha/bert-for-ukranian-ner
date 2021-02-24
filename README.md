@@ -18,11 +18,11 @@ Then if you use `conda` (recommended) to manage environments (to use regular vir
 
 * create new `conda` environment for your project (change env name for your desired one):
 
-    `conda create -n spark_code_examples python=3.8`
+    `conda create -n bert_for_ner python=3.8`
 
 * actiave environment:
 
-    `conda activate spark_code_examples`
+    `conda activate bert_for_ner`
 
 Now you are ready to add dependencies to your project. For this use [`add` command](https://python-poetry.org/docs/cli/#add):
 
