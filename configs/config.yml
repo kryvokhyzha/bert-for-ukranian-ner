@@ -1,7 +1,9 @@
 data:
-  path_to_corpus: data/corpus
-  path_to_preproc_data: data/preproc-data
-  path_to_output: data/path_to_output
+  path_to_corpus_folder: data/corpus
+  path_to_preproc_data_folder: data/preproc-data
+  path_to_output_folder: data/path_to_output
+  path_to_preproc_data: data/preproc-data/preproc-data.pkl
+  path_to_output: data/path_to_output/output.pkl
 
 model:
   model_name: bert-base-cased
