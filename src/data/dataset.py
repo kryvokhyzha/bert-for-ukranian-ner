@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Union
+from typing import Dict, Iterable, Mapping, Union
 
 import torch
 import transformers
@@ -15,13 +15,17 @@ class NamedEntityRecognitionDataset(Dataset):
     def __init__(
         self,
         texts: Iterable[Iterable[str]],
-        tags: Iterable[Iterable[str]],
-        tokenizer: Union[str, transformers.tokenization_utils.PreTrainedTokenizer],
+        tags: Iterable[Iterable[str]] = None,
+        tags_dict: Mapping[str, int] = None,
+        tokenizer: Union[
+            str, transformers.tokenization_utils.PreTrainedTokenizer
+        ] = 'distilbert-base-uncased',
         max_seq_len: int = None,
         lazy_mode: bool = True,
     ):
         self.tags = tags
         self.texts = texts
+        self.tags_dict = tags_dict
 
         if isinstance(tokenizer, str):
             self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
@@ -37,6 +41,17 @@ class NamedEntityRecognitionDataset(Dataset):
 
         if self.max_seq_len < 3:
             raise ValueError("Max sequence length should be greather than 2")
+
+        if self.tags_dict is None and tags is not None:
+            # {'class1': 0, 'class2': 1, 'class3': 2, ...}
+            # using this instead of `sklearn.preprocessing.LabelEncoder`
+            # no easily handle unknown target values
+            self.tags_dict = dict(
+                zip(
+                    sorted(set([item for sublist in tags for item in sublist])),
+                    range(len(set([item for sublist in tags for item in sublist]))),
+                )
+            )
 
         if not lazy_mode:
             pbar = tqdm(self.length, desc="tokenizing texts")
@@ -56,34 +71,40 @@ class NamedEntityRecognitionDataset(Dataset):
         sentence = self.texts[index]
         tag = self.tags[index]
 
-        encode_ids = []
+        input_ids = []
         target_tag = []
+
         for i, word in enumerate(sentence):
             words_piece_ids = self.tokenizer.encode(
                 word,
                 max_length=self.max_seq_len,
-                add_special_tokes=False,
+                truncation=True,
+                add_special_tokens=False,
             )
-            encode_ids.extend(words_piece_ids)
-            target_tag.extend([tag[i]] * len(words_piece_ids))
+            input_ids.extend(words_piece_ids)
+            if self.tags is not None:
+                target_tag.extend([tag[i]] * len(words_piece_ids))
 
-        encode_ids = [101] + encode_ids[: self.max_seq_len - 2] + [102]
-        target_tag = [0] + target_tag[: self.max_seq_len - 2] + [0]
+        input_ids = [101] + input_ids[: self.max_seq_len - 2] + [102]
 
-        attention_mask = [1] * len(encode_ids)
-        token_type_ids = [0] * len(encode_ids)
+        attention_mask = [1] * len(input_ids)
+        token_type_ids = [0] * len(input_ids)
 
-        padding_len = self.max_seq_len - len(encode_ids)
-        encode_ids = encode_ids + ([0] * padding_len)
+        padding_len = self.max_seq_len - len(input_ids)
+        input_ids = input_ids + ([0] * padding_len)
         attention_mask = attention_mask + ([0] * padding_len)
         token_type_ids = token_type_ids + ([0] * padding_len)
-        target_tag = target_tag + ([0] * padding_len)
+
+        if self.tags is not None:
+            target_tag = [self.tags_dict.get(y, -1) for y in target_tag]
+            target_tag = [0] + target_tag[: self.max_seq_len - 2] + [0]
+            target_tag = target_tag + ([0] * padding_len)
 
         return {
-            'encode_ids': torch.tensor(encode_ids, dtype=torch.long),
+            'input_ids': torch.tensor(input_ids, dtype=torch.long),
             'attention_mask': torch.tensor(attention_mask, dtype=torch.long),
             'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
-            'target_tag': torch.tensor(encode_ids, dtype=torch.long),
+            'target_tag': torch.tensor(target_tag, dtype=torch.long),
         }
 
     def __getitem__(self, index: int) -> Dict[str, torch.Tensor]:
