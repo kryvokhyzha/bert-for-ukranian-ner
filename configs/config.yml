@@ -7,13 +7,14 @@ data:
 
 model:
   model_name: bert-base-cased
-  max_seq_length: 256
+  max_seq_length: 128
 
 training:
-  learning_rate: 3e-5
   num_epochs: 10
+  learning_rate: 3e-5
   accum_steps: 4
-  batch_size: 15
+  train_batch_size: 32
+  valid_batch_size: 8
   log_dir: logdir
   fp16_params: None
 
