@@ -1,17 +1,20 @@
 data:
-  path_to_corpus: data/corpus
-  path_to_preproc_data: data/preproc-data
-  path_to_output: data/path_to_output
+  path_to_corpus_folder: data/corpus
+  path_to_preproc_data_folder: data/preproc-data
+  path_to_output_folder: data/path_to_output
+  path_to_preproc_data: data/preproc-data/preproc-data.pkl
+  path_to_output: data/path_to_output/output.pkl
 
 model:
   model_name: bert-base-cased
-  max_seq_length: 256
+  max_seq_length: 128
 
 training:
-  learning_rate: 3e-5
   num_epochs: 10
+  learning_rate: 3e-5
   accum_steps: 4
-  batch_size: 15
+  train_batch_size: 32
+  valid_batch_size: 8
   log_dir: logdir
   fp16_params: None
 

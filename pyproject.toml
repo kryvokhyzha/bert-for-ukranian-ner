@@ -7,6 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
+tokenize_uk = "0.2.0"
 
 [tool.black]
 line-length = 90

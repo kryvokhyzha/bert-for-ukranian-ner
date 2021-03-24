@@ -273,9 +273,20 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
+
+[[package]]
+name = "tokenize-uk"
+version = "0.2.0"
+description = "Simple python lib to tokenize texts into sentences and sentences to words. Small, fast and robust. Comes with ukrainian flavour"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = "*"
 
 [[package]]
 name = "toml"
@@ -328,7 +339,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "820fe41858d5213261d34a61697612f341c2561141f256f424dc9a17a517c425"
+content-hash = "e18b0de39d4a7554e9bac4a6d854806e406e861613afc222cc4c04c3a7414cf9"
 
 [metadata.files]
 appdirs = [
@@ -457,6 +468,9 @@ pyyaml = [
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},
+]
+tokenize-uk = [
+    {file = "tokenize_uk-0.2.0.tar.gz", hash = "sha256:be9c043a00d43d2a6fd36fbd57c67b4a1f321fa778db107e9fa92a2eddb7c1fc"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
