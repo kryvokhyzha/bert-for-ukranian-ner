@@ -2,17 +2,7 @@ import torch
 import torch.nn as nn
 from transformers import AutoConfig, AutoModel
 
-
-def loss_fn(output, target, attention_mask, num_labels):
-    lfn = nn.CrossEntropyLoss()
-    active_loss = attention_mask.view(-1) == 1
-    active_logits = output.view(-1, num_labels)
-    active_labels = torch.where(
-        active_loss, target.view(-1), torch.tensor(lfn.ignore_index).type_as(target)
-    )
-
-    loss = lfn(active_logits, active_labels)
-    return loss
+from .utils.loss_fn import loss_fn
 
 
 class NamedEntityRecognitionBertModel(nn.Module):
