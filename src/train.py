@@ -1,7 +1,7 @@
 from pathlib import Path
 
+import joblib
 import numpy as np
-import pandas as pd
 import torch
 from sklearn import model_selection
 from transformers import AdamW, get_linear_schedule_with_warmup
@@ -20,7 +20,7 @@ MODEL_NAME = 'youscan/ukr-roberta-base'
 
 
 if __name__ == "__main__":
-    data = pd.read_pickle(PATH2ROOT / CONFIG['data']['path_to_preproc_data'])
+    data = joblib.load(PATH2ROOT / CONFIG['data']['path_to_preproc_data'])
     texts = data['text'].values.tolist()
     tags = data['tags'].values.tolist()
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     model = NamedEntityRecognitionBertModel(
         pretrained_model_name=MODEL_NAME, num_tag=num_tag
     )
-    model.to(device)
+    model = model.to(device)
 
     param_optimizer = list(model.named_parameters())
     no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
