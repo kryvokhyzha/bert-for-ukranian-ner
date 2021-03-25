@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from transformers import AutoConfig, AutoModel
 
-from .utils.loss_fn import loss_fn
+from models.utils.loss_fn import loss_fn
 
 
 class NamedEntityRecognitionBertModel(nn.Module):

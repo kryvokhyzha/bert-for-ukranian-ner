@@ -4,6 +4,7 @@ data:
   path_to_output_folder: data/path_to_output
   path_to_preproc_data: data/preproc-data/preproc-data.pkl
   path_to_output: data/path_to_output/output.pkl
+  path_to_logdir: logdir
 
 model:
   model_name: bert-base-cased
@@ -20,3 +21,4 @@ training:
 
 general:
   seed: 43
+  test_size: 0.1
