@@ -1,0 +1,34 @@
+data:
+  path_to_corpus_folder: data/corpus
+  path_to_preproc_data_folder: data/preproc-data
+  path_to_output_folder: data/path_to_output
+  path_to_preproc_data: data/preproc-data/preproc-data.bin
+  path_to_output: data/path_to_output/output.bin
+  path_to_logdir: logdir
+
+model:
+  model_name: youscan/ukr-roberta-base
+  max_seq_length: 4
+  lstm_dim: 5
+  lstm_num_layers: 1
+  lstm_dropout_rate: 0.3
+  lstm_bidirectional_flag: 1
+  cnn_dropout_rate: 0.4
+  fc_droupout_rate: 0.4
+  use_cnn_flag: 0
+
+training:
+  num_epochs: 2
+  learning_rate: 3e-3
+  accum_steps: 1
+  train_batch_size: 4
+  valid_batch_size: 4
+  log_dir: logdir
+  fp16_params: None
+  num_workers: 1
+  focal_loss_gamma: 0
+  is_deterministic: 1
+
+general:
+  seed: 43
+  test_size: 0.1

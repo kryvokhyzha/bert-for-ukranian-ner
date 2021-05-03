@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Mapping, Union
+from typing import Dict, Iterable, Union
 
 import torch
 import transformers
@@ -16,7 +16,6 @@ class NamedEntityRecognitionDataset(Dataset):
         self,
         texts: Iterable[Iterable[str]],
         tags: Iterable[Iterable[str]] = None,
-        tags_dict: Mapping[str, int] = None,
         tokenizer: Union[
             str, transformers.tokenization_utils.PreTrainedTokenizer
         ] = 'distilbert-base-uncased',
@@ -25,7 +24,6 @@ class NamedEntityRecognitionDataset(Dataset):
     ):
         self.tags = tags
         self.texts = texts
-        self.tags_dict = tags_dict
 
         if isinstance(tokenizer, str):
             self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
@@ -41,17 +39,6 @@ class NamedEntityRecognitionDataset(Dataset):
 
         if self.max_seq_len < 3:
             raise ValueError("Max sequence length should be greather than 2")
-
-        if self.tags_dict is None and tags is not None:
-            # {'class1': 0, 'class2': 1, 'class3': 2, ...}
-            # using this instead of `sklearn.preprocessing.LabelEncoder`
-            # no easily handle unknown target values
-            self.tags_dict = dict(
-                zip(
-                    sorted(set([item for sublist in tags for item in sublist])),
-                    range(len(set([item for sublist in tags for item in sublist]))),
-                )
-            )
 
         if not lazy_mode:
             pbar = tqdm(self.length, desc="tokenizing texts")
@@ -82,28 +69,26 @@ class NamedEntityRecognitionDataset(Dataset):
                 add_special_tokens=False,
             )
             input_ids.extend(words_piece_ids)
-            if self.tags is not None:
-                target_tag.extend([tag[i]] * len(words_piece_ids))
+            target_tag.extend([tag[i]] * len(words_piece_ids))
 
-        input_ids = [101] + input_ids[: self.max_seq_len - 2] + [102]
+        input_ids = (
+            [self.tokenizer.cls_token_id]
+            + input_ids[: self.max_seq_len - 2]
+            + [self.tokenizer.sep_token_id]
+        )
 
         attention_mask = [1] * len(input_ids)
-        token_type_ids = [0] * len(input_ids)
 
         padding_len = self.max_seq_len - len(input_ids)
-        input_ids = input_ids + ([0] * padding_len)
+        input_ids = input_ids + ([self.tokenizer.pad_token_id] * padding_len)
         attention_mask = attention_mask + ([0] * padding_len)
-        token_type_ids = token_type_ids + ([0] * padding_len)
 
-        if self.tags is not None:
-            target_tag = [self.tags_dict.get(y, -1) for y in target_tag]
-            target_tag = [0] + target_tag[: self.max_seq_len - 2] + [0]
-            target_tag = target_tag + ([0] * padding_len)
+        target_tag = [0] + target_tag[: self.max_seq_len - 2] + [0]
+        target_tag = target_tag + ([0] * padding_len)
 
         return {
             'input_ids': torch.tensor(input_ids, dtype=torch.long),
             'attention_mask': torch.tensor(attention_mask, dtype=torch.long),
-            'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
             'target_tag': torch.tensor(target_tag, dtype=torch.long),
         }
 
