@@ -1,37 +1,86 @@
+from typing import Dict
+
 import torch
 import torch.nn as nn
 from transformers import AutoConfig, AutoModel
 
-from models.utils.loss_fn import loss_fn
-
 
 class NamedEntityRecognitionBertModel(nn.Module):
-    def __init__(self, pretrained_model_name: str, num_tag: int):
+    def __init__(
+        self,
+        pretrained_model_name: str,
+        output_dim: int,
+        lstm_dim: int = 256,
+        lstm_num_layers: int = 2,
+        lstm_dropout_rate: float = 0.3,
+        lstm_bidirectional_flag: bool = True,
+        cnn_dropout_rate: float = 0.4,
+        fc_droupout_rate: float = 0.4,
+        use_cnn_flag: bool = False,
+    ):
         super().__init__()
 
-        self.num_tag = num_tag
+        self.output_dim = output_dim
+        self.use_cnn_flag = use_cnn_flag
 
         config = AutoConfig.from_pretrained(pretrained_model_name)
 
         self.model = AutoModel.from_pretrained(pretrained_model_name, config=config)
-        self.droupout1 = nn.Dropout(0.3)
-        self.linear1 = nn.Linear(768, self.num_tag)
+
+        self.lstm = nn.LSTM(
+            self.model.config.hidden_size,
+            lstm_dim,
+            num_layers=lstm_num_layers,
+            bidirectional=lstm_bidirectional_flag,
+            batch_first=True,
+            dropout=lstm_dropout_rate if lstm_num_layers > 1 else 0,
+        )
+
+        self.droupout = nn.Dropout(fc_droupout_rate)
+        lstm_output_dim = lstm_dim * 2 if lstm_bidirectional_flag else lstm_dim
+
+        self.fc = nn.Linear(lstm_output_dim, output_dim)
+
+        if self.use_cnn_flag:
+            self.cnn_list = list()
+            for _ in range(1):
+                self.cnn_list.append(
+                    nn.Conv1d(
+                        in_channels=lstm_output_dim,
+                        out_channels=lstm_output_dim,
+                        kernel_size=3,
+                        padding=1,
+                    )
+                )
+                self.cnn_list.append(nn.ReLU())
+                self.cnn_list.append(nn.Dropout(cnn_dropout_rate))
+                self.cnn_list.append(nn.BatchNorm1d(lstm_output_dim))
+            self.cnn = nn.Sequential(*self.cnn_list)
 
     def forward(
         self,
         input_ids: torch.Tensor,
         attention_mask: torch.Tensor,
-        token_type_ids: torch.Tensor,
-        target_tag: torch.Tensor,
+        **kwargs: Dict,
     ):
-        o1, _ = self.model(
-            input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
-        )
+        o1, _ = self.model(input_ids, attention_mask=attention_mask, return_dict=False)
 
-        bo_tag = self.droupout1(o1)
+        # print('o1', o1.size()) [32, 128, 768] == [batch size, sent len, emb dim]
+        # o1 = o1.permute(1, 0, 2) # [sent len, batch size, emb dim]
 
-        tag = self.linear1(bo_tag)
+        logits, (hidden, cell) = self.lstm(o1)
+        if self.use_cnn_flag:
+            logits = (
+                self.cnn(logits.transpose(2, 1).contiguous()).transpose(2, 1).contiguous()
+            )
+            logits = logits.permute(1, 0, 2)
+        logits = self.fc(logits)
+        return logits
 
-        loss = loss_fn(tag, target_tag, attention_mask, self.num_tag)
+    def freeze(self):
+        for param in self.model.parameters():
+            param.requires_grad = False
 
-        return tag, loss
+    def unfreeze(self):
+        for param in self.model.parameters():
+            param.requires_grad = True

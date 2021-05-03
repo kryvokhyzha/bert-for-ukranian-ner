@@ -130,3 +130,9 @@ dmypy.json
 
 # VScode
 .vscode
+
+# logdir
+checkpoints
+logs
+tensorboard
+*.pth

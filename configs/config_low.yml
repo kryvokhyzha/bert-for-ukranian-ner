@@ -8,9 +8,9 @@ data:
 
 model:
   model_name: youscan/ukr-roberta-base
-  max_seq_length: 128
-  lstm_dim: 256
-  lstm_num_layers: 2
+  max_seq_length: 4
+  lstm_dim: 5
+  lstm_num_layers: 1
   lstm_dropout_rate: 0.3
   lstm_bidirectional_flag: 1
   cnn_dropout_rate: 0.4
@@ -18,14 +18,14 @@ model:
   use_cnn_flag: 0
 
 training:
-  num_epochs: 14
+  num_epochs: 2
   learning_rate: 3e-3
   accum_steps: 1
-  train_batch_size: 32
-  valid_batch_size: 8
+  train_batch_size: 4
+  valid_batch_size: 4
   log_dir: logdir
   fp16_params: None
-  num_workers: 4
+  num_workers: 1
   focal_loss_gamma: 0
   is_deterministic: 1
 
