@@ -15,29 +15,35 @@ class NamedEntityRecognitionBertModel(nn.Module):
         lstm_dropout_rate: float = 0.3,
         lstm_bidirectional_flag: bool = True,
         cnn_dropout_rate: float = 0.4,
-        fc_droupout_rate: float = 0.4,
+        fc_dropout_rate: float = 0.4,
+        use_lstm_flag: bool = False,
         use_cnn_flag: bool = False,
     ):
         super().__init__()
 
         self.output_dim = output_dim
+        self.use_lstm_flag = use_lstm_flag
         self.use_cnn_flag = use_cnn_flag
 
         config = AutoConfig.from_pretrained(pretrained_model_name)
 
         self.model = AutoModel.from_pretrained(pretrained_model_name, config=config)
 
-        self.lstm = nn.LSTM(
-            self.model.config.hidden_size,
-            lstm_dim,
-            num_layers=lstm_num_layers,
-            bidirectional=lstm_bidirectional_flag,
-            batch_first=True,
-            dropout=lstm_dropout_rate if lstm_num_layers > 1 else 0,
-        )
+        if self.use_lstm_flag:
+            self.lstm = nn.LSTM(
+                self.model.config.hidden_size,
+                lstm_dim,
+                num_layers=lstm_num_layers,
+                bidirectional=lstm_bidirectional_flag,
+                batch_first=True,
+                dropout=lstm_dropout_rate if lstm_num_layers > 1 else 0,
+            )
 
-        self.droupout = nn.Dropout(fc_droupout_rate)
+        self.dropout = nn.Dropout(fc_dropout_rate)
         lstm_output_dim = lstm_dim * 2 if lstm_bidirectional_flag else lstm_dim
+        lstm_output_dim = (
+            lstm_output_dim * 2 if self.use_lstm_flag else self.model.config.hidden_size
+        )
 
         self.fc = nn.Linear(lstm_output_dim, output_dim)
 
@@ -63,12 +69,15 @@ class NamedEntityRecognitionBertModel(nn.Module):
         attention_mask: torch.Tensor,
         **kwargs: Dict,
     ):
-        o1, _ = self.model(input_ids, attention_mask=attention_mask, return_dict=False)
+        logits, _ = self.model(
+            input_ids, attention_mask=attention_mask, return_dict=False
+        )
 
         # print('o1', o1.size()) [32, 128, 768] == [batch size, sent len, emb dim]
         # o1 = o1.permute(1, 0, 2) # [sent len, batch size, emb dim]
 
-        logits, (hidden, cell) = self.lstm(o1)
+        if self.use_lstm_flag:
+            logits, (hidden, cell) = self.lstm(logits)
         if self.use_cnn_flag:
             logits = (
                 self.cnn(logits.transpose(2, 1).contiguous()).transpose(2, 1).contiguous()
