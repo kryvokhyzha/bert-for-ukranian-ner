@@ -15,10 +15,11 @@ model:
   lstm_bidirectional_flag: 1
   cnn_dropout_rate: 0.4
   fc_droupout_rate: 0.4
+  use_lstm_flag: 0
   use_cnn_flag: 0
 
 training:
-  num_epochs: 14
+  num_epochs: 5
   learning_rate: 3e-3
   accum_steps: 1
   train_batch_size: 32

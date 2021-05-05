@@ -85,6 +85,7 @@ if __name__ == "__main__":
         lstm_bidirectional_flag=bool(CONFIG['model']['lstm_bidirectional_flag']),
         cnn_dropout_rate=CONFIG['model']['cnn_dropout_rate'],
         fc_droupout_rate=CONFIG['model']['fc_droupout_rate'],
+        use_lstm_flag=CONFIG['model']['use_lstm_flag'],
         use_cnn_flag=bool(CONFIG['model']['use_cnn_flag']),
     )
     model = model.to(device)
