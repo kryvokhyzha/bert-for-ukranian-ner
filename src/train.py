@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import joblib
@@ -26,7 +27,10 @@ if __name__ == "__main__":
     texts = data['text'].values.tolist()
     tags = data['tags'].values.tolist()
 
-    tag_map = {'O': 0, 'LOC': 1, 'MISC': 2, 'ORG': 3, 'PERS': 4}
+    with open(PATH2CONFIG / 'target_mapper.json', 'r') as file:
+        tag_map = json.load(file)
+
+    tag_map = {key: val[0] for key, val in tag_map.items()}
 
     for i in range(len(tags)):
         for j in range(len(tags[i])):
