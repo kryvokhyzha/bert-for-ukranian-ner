@@ -74,7 +74,11 @@ if __name__ == "__main__":
         num_workers=CONFIG['training']['num_workers'],
     )
 
-    device = device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = (
+        torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        if CONFIG['general']['device'] == 'auto'
+        else torch.device(CONFIG['general']['device'])
+    )
 
     model = NamedEntityRecognitionBertModel(
         pretrained_model_name=MODEL_NAME,
@@ -84,7 +88,7 @@ if __name__ == "__main__":
         lstm_dropout_rate=CONFIG['model']['lstm_dropout_rate'],
         lstm_bidirectional_flag=bool(CONFIG['model']['lstm_bidirectional_flag']),
         cnn_dropout_rate=CONFIG['model']['cnn_dropout_rate'],
-        fc_droupout_rate=CONFIG['model']['fc_droupout_rate'],
+        fc_dropout_rate=CONFIG['model']['fc_dropout_rate'],
         use_lstm_flag=CONFIG['model']['use_lstm_flag'],
         use_cnn_flag=bool(CONFIG['model']['use_cnn_flag']),
     )
