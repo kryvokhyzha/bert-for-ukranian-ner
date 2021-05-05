@@ -124,7 +124,8 @@ def get_model(PATH2ROOT: Path, CONFIG: Dict, device, output_dim):
         lstm_dropout_rate=CONFIG['model']['lstm_dropout_rate'],
         lstm_bidirectional_flag=bool(CONFIG['model']['lstm_bidirectional_flag']),
         cnn_dropout_rate=CONFIG['model']['cnn_dropout_rate'],
-        fc_droupout_rate=CONFIG['model']['fc_droupout_rate'],
+        fc_dropout_rate=CONFIG['model']['fc_dropout_rate'],
+        use_lstm_flag=bool(CONFIG['model']['use_lstm_flag']),
         use_cnn_flag=bool(CONFIG['model']['use_cnn_flag']),
     )
 
@@ -133,6 +134,7 @@ def get_model(PATH2ROOT: Path, CONFIG: Dict, device, output_dim):
             PATH2ROOT / CONFIG['data']['path_to_logdir'] / 'best.pth', map_location=device
         )
     )
+
     model.freeze()
     return model
 
@@ -144,8 +146,11 @@ def get_general_page():
 
     inv_tag_map = {val[0]: (key, val[1]) for key, val in tag_map.items()}
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    device = "cpu"
+    device = (
+        torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        if CONFIG['general']['device'] == 'auto'
+        else torch.device(CONFIG['general']['device'])
+    )
     model = get_model(PATH2ROOT, CONFIG, device, len(tag_map.keys()))
 
     st.title('Named Entity Recognition using BERT')
