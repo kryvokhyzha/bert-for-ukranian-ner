@@ -1,6 +1,14 @@
 # bert-for-ukranian-ner
 This repository contains I part of my bachelor's project
 
+## Demonstration
+![](https://github.com/kryvokhyzha/bert-for-ukranian-ner/blob/main/imgs/ner_viz.gif)
+
+## Focal Loss Plot
+![](https://github.com/kryvokhyzha/bert-for-ukranian-ner/blob/main/imgs/tb_focal_loss.png)
+
+## Accuracy Plot
+![](https://github.com/kryvokhyzha/bert-for-ukranian-ner/blob/main/imgs/tb_accuracy.png)
 
 ## How to setup an environment?
 
