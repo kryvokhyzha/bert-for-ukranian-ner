@@ -4,7 +4,7 @@ from typing import Tuple
 
 
 def db_creation():
-    conn = sql.connect('db/user_history.db')
+    conn = sql.connect('pages/db/user_history.db')
     cur = conn.cursor()
 
     cur.executescript(
@@ -15,9 +15,8 @@ def db_creation():
             tok_text TEXT NOT NULL,
             parameters TEXT NOT NULL,
             result TEXT NOT NULL,
-            ins_dt timestamp NOT NULL,
-        );
-    '''
+            ins_dt timestamp NOT NULL
+        );'''
     )
 
     conn.commit()
@@ -25,21 +24,17 @@ def db_creation():
 
 
 def db_clean():
-    conn = sql.connect('db/user_history.db')
+    conn = sql.connect('pages/db/user_history.db')
     cur = conn.cursor()
 
-    cur.executescript(
-        '''
-            DELETE FROM UserHistory;
-    '''
-    )
+    cur.executescript('''DELETE FROM UserHistory;''')
 
     conn.commit()
     conn.close()
 
 
 def db_insert(raw_text: str, tok_text: str, parameters: str, result: str):
-    conn = sql.connect('db/user_history.db')
+    conn = sql.connect('pages/db/user_history.db')
     cur = conn.cursor()
 
     user_history = (raw_text, tok_text, parameters, result, dt.datetime.now(tz=None))
@@ -55,12 +50,11 @@ def db_insert(raw_text: str, tok_text: str, parameters: str, result: str):
 
 
 def db_select() -> Tuple:
-    conn = sql.connect('db/user_history.db')
+    conn = sql.connect('pages/db/user_history.db')
     cur = conn.cursor()
 
     cur.execute(
-        '''SELECT uh.raw_text, uh.tok_text, uh.parameters, uh.result, uh.ins_dt
-                    FROM UserHistory as uh;'''
+        '''SELECT uh.raw_text, uh.tok_text, uh.parameters, uh.result, uh.ins_dt FROM UserHistory as uh;'''
     )
     rows = cur.fetchall()
 

@@ -7,12 +7,12 @@ from catalyst.utils import prepare_cudnn, set_global_seed
 from sklearn import model_selection
 from transformers import AdamW, get_linear_schedule_with_warmup
 
-from data.dataset import NamedEntityRecognitionDataset
-from models.loss_fn.FocalLossCustom import FocalLossCustom
-from models.NamedEntityRecognitionBertModel import NamedEntityRecognitionBertModel
-from utils.callbacks.AccuracyCallbackCustom import AccuracyCallbackCustom
+from datasets import NamedEntityRecognitionDataset
+from models import NamedEntityRecognitionBertModel
+from models.loss_fn import FocalLossCustom
+from utils.callbacks import AccuracyCallbackCustom
 from utils.helpers import get_config, remove_dir
-from utils.runners.CustomRunner import CustomRunner
+from utils.runners import CustomRunner
 
 
 PATH2ROOT = Path('..')
