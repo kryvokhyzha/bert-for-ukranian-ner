@@ -41,8 +41,10 @@ class NamedEntityRecognitionDataset(Dataset):
             raise ValueError("Max sequence length should be greather than 2")
 
         if not lazy_mode:
-            pbar = tqdm(self.length, desc="tokenizing texts")
-            self.encoded = [self._getitem_lazy(idx) for idx in pbar]
+            self.encoded = [
+                self._getitem_lazy(idx)
+                for idx in tqdm(range(self.length), desc='tokenizing texts')
+            ]
             del self.texts
             del self.tags
 
@@ -52,7 +54,7 @@ class NamedEntityRecognitionDataset(Dataset):
         return self.length
 
     def _getitem_encoded(self, index: int) -> Dict[str, torch.Tensor]:
-        return torch.tensor(self.encoded[index])
+        return self.encoded[index]
 
     def _getitem_lazy(self, index: int) -> Dict[str, torch.Tensor]:
         sentence = self.texts[index]
