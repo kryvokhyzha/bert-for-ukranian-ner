@@ -136,3 +136,6 @@ checkpoints
 logs
 tensorboard
 *.pth
+
+#db
+*.db
